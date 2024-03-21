@@ -188,5 +188,8 @@ void            clearpteu(pde_t *pgdir, char *uva);
 
 //prac_syscall.c
 int 		myfunction(char*);
+
+//project1_syscall.c
+int		getgpid(char*);
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
