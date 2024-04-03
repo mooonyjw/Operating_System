@@ -1,4 +1,4 @@
-cscope 15 $HOME/xv6-public               0000396048
+cscope 15 $HOME/xv6-public               0000396388
 	@asm.h
 
 5 
@@ -3729,7 +3729,11 @@ uva
 	`myfunùiÚ
 (*);
 
-192 
+193 
+	`g‘gpid
+(*);
+
+195 
 	#NELEM
 (
 x
@@ -24502,155 +24506,165 @@ sys_u±ime
 sys_myfunùiÚ
 ();
 
-108 (*
+107 
+sys_g‘gpid
+();
+
+109 (*
 sysÿÎs
 [])() = {
 
-109 [
+110 [
 SYS_fÜk
 ] 
 sys_fÜk
 ,
 
-110 [
+111 [
 SYS_ex™
 ] 
 sys_ex™
 ,
 
-111 [
+112 [
 SYS_wa™
 ] 
 sys_wa™
 ,
 
-112 [
+113 [
 SYS_pe
 ] 
 sys_pe
 ,
 
-113 [
+114 [
 SYS_»ad
 ] 
 sys_»ad
 ,
 
-114 [
+115 [
 SYS_kžl
 ] 
 sys_kžl
 ,
 
-115 [
+116 [
 SYS_exec
 ] 
 sys_exec
 ,
 
-116 [
+117 [
 SYS_f¡©
 ] 
 sys_f¡©
 ,
 
-117 [
+118 [
 SYS_chdœ
 ] 
 sys_chdœ
 ,
 
-118 [
+119 [
 SYS_dup
 ] 
 sys_dup
 ,
 
-119 [
+120 [
 SYS_g‘pid
 ] 
 sys_g‘pid
 ,
 
-120 [
+121 [
 SYS_sbrk
 ] 
 sys_sbrk
 ,
 
-121 [
+122 [
 SYS_¦“p
 ] 
 sys_¦“p
 ,
 
-122 [
+123 [
 SYS_u±ime
 ] 
 sys_u±ime
 ,
 
-123 [
+124 [
 SYS_Ý’
 ] 
 sys_Ý’
 ,
 
-124 [
+125 [
 SYS_wr™e
 ] 
 sys_wr™e
 ,
 
-125 [
+126 [
 SYS_mknod
 ] 
 sys_mknod
 ,
 
-126 [
+127 [
 SYS_uÆšk
 ] 
 sys_uÆšk
 ,
 
-127 [
+128 [
 SYS_lšk
 ] 
 sys_lšk
 ,
 
-128 [
+129 [
 SYS_mkdœ
 ] 
 sys_mkdœ
 ,
 
-129 [
+130 [
 SYS_þo£
 ] 
 sys_þo£
 ,
 
-130 [
+131 [
 SYS_myfunùiÚ
 ] 
 sys_myfunùiÚ
 ,
 
-131 
+132 [
+SYS_g‘gpid
+] 
+sys_g‘gpid
+,
+
+133 
 	}
 };
 
-134 
+136 
 	$sysÿÎ
 ()
 
-136 
+138 
 num
 ;
 
-137 
+139 
 ´oc
  *
 cu½roc
@@ -24658,7 +24672,7 @@ cu½roc
 	`my´oc
 ();
 
-139 
+141 
 num
  = 
 cu½roc
@@ -24668,7 +24682,7 @@ tf
 —x
 ;
 
-140 if(
+142 if(
 num
  > 0 &&‚um < 
 	`NELEM
@@ -24676,7 +24690,7 @@ num
 sysÿÎs
 ) && syscalls[num]) {
 
-141 
+143 
 cu½roc
 ->
 tf
@@ -24688,11 +24702,11 @@ sysÿÎs
 num
 ]();
 
-143 
+145 
 	`ýrštf
 ("%d %s: unknown sys call %d\n",
 
-144 
+146 
 cu½roc
 ->
 pid
@@ -24702,7 +24716,7 @@ pid
 num
 );
 
-145 
+147 
 cu½roc
 ->
 tf
@@ -24710,7 +24724,7 @@ tf
 —x
  = -1;
 
-147 
+149 
 	}
 }
 
@@ -24845,6 +24859,12 @@ tf
 23 
 	#SYS_myfunùiÚ
  22
+
+	)
+
+24 
+	#SYS_g‘gpid
+ 23
 
 	)
 
@@ -26550,8 +26570,12 @@ pid
 pid
 );
 
+37 
+	}
+}
+
 40 
-	`sys_g‘pid
+	$sys_g‘pid
 ()
 
 42  
@@ -26560,8 +26584,12 @@ pid
 pid
 ;
 
+43 
+	}
+}
+
 46 
-	`sys_sbrk
+	$sys_sbrk
 ()
 
 48 
@@ -26596,8 +26624,12 @@ n
 addr
 ;
 
+57 
+	}
+}
+
 60 
-	`sys_¦“p
+	$sys_¦“p
 ()
 
 62 
@@ -26662,8 +26694,12 @@ tick¦ock
 tick¦ock
 );
 
+78 
+	}
+}
+
 83 
-	`sys_u±ime
+	$sys_u±ime
 ()
 
 85 
@@ -26693,6 +26729,10 @@ tick¦ock
 90  
 xticks
 ;
+
+91 
+	}
+}
 
 	@trap.c
 
@@ -26794,6 +26834,18 @@ veùÜs
 DPL_USER
 );
 
+25 
+	`SETGATE
+(
+idt
+[128], 1, 
+SEG_KCODE
+<<3, 
+veùÜs
+[128], 
+DPL_USER
+);
+
 26 
 	`š™lock
 (&
@@ -26870,51 +26922,45 @@ tf
 Œ­no
 ){
 
-50 
+51 
+	`ýrštf
+("user interrupt 128 called!\n");
+
+52 
+	`ex™
+();
+
+54 
 T_IRQ0
  + 
 IRQ_TIMER
 :
 
-51 if(
+55 if(
 	`ýuid
 () == 0){
 
-52 
+56 
 	`acquœe
 (&
 tick¦ock
 );
 
-53 
+57 
 ticks
 ++;
 
-54 
+58 
 	`wakeup
 (&
 ticks
 );
 
-55 
+59 
 	`»Ëa£
 (&
 tick¦ock
 );
-
-57 
-	`Ïpiûoi
-();
-
-59 
-T_IRQ0
- + 
-IRQ_IDE
-:
-
-60 
-	`idešŒ
-();
 
 61 
 	`Ïpiûoi
@@ -26924,30 +26970,30 @@ IRQ_IDE
 T_IRQ0
  + 
 IRQ_IDE
+:
+
+64 
+	`idešŒ
+();
+
+65 
+	`Ïpiûoi
+();
+
+67 
+T_IRQ0
+ + 
+IRQ_IDE
 +1:
 
-66 
+70 
 T_IRQ0
  + 
 IRQ_KBD
 :
 
-67 
-	`kbdšŒ
-();
-
-68 
-	`Ïpiûoi
-();
-
-70 
-T_IRQ0
- + 
-IRQ_COM1
-:
-
 71 
-	`u¬tšŒ
+	`kbdšŒ
 ();
 
 72 
@@ -26956,19 +27002,33 @@ IRQ_COM1
 
 74 
 T_IRQ0
+ + 
+IRQ_COM1
+:
+
+75 
+	`u¬tšŒ
+();
+
+76 
+	`Ïpiûoi
+();
+
+78 
+T_IRQ0
  + 7:
 
-75 
+79 
 T_IRQ0
  + 
 IRQ_SPURIOUS
 :
 
-76 
+80 
 	`ýrštf
 ("cpu%d: spurious interrupt‡t %x:%x\n",
 
-77 
+81 
 	`ýuid
 (), 
 tf
@@ -26978,11 +27038,11 @@ cs
 e
 );
 
-78 
+82 
 	`Ïpiûoi
 ();
 
-83 if(
+87 if(
 	`my´oc
 (è=ð0 || (
 tf
@@ -26990,11 +27050,11 @@ tf
 cs
 &3) == 0){
 
-85 
+89 
 	`ýrštf
 ("unexpectedrap %d from cpu %dƒip %x (cr2=0x%x)\n",
 
-86 
+90 
 tf
 ->
 Œ­no
@@ -27006,15 +27066,15 @@ e
 	`rü2
 ());
 
-87 
+91 
 	`·nic
 ("trap");
 
-90 
+94 
 	`ýrštf
 ("pid %d %s:rap %dƒrr %d on cpu %d "
 
-92 
+96 
 	`my´oc
 ()->
 pid
@@ -27026,7 +27086,7 @@ tf
 Œ­no
 ,
 
-93 
+97 
 tf
 ->
 ”r
@@ -27038,13 +27098,13 @@ e
 	`rü2
 ());
 
-94 
+98 
 	`my´oc
 ()->
 kžËd
  = 1;
 
-100 if(
+104 if(
 	`my´oc
 (è&& my´oc()->
 kžËd
@@ -27056,11 +27116,11 @@ cs
 DPL_USER
 )
 
-101 
+105 
 	`ex™
 ();
 
-105 if(
+109 if(
 	`my´oc
 (è&& my´oc()->
 ¡©e
@@ -27068,7 +27128,7 @@ DPL_USER
 RUNNING
  &&
 
-106 
+110 
 tf
 ->
 Œ­no
@@ -27078,11 +27138,11 @@ T_IRQ0
 IRQ_TIMER
 )
 
-107 
+111 
 	`y›ld
 ();
 
-110 if(
+114 if(
 	`my´oc
 (è&& my´oc()->
 kžËd
@@ -27094,11 +27154,11 @@ cs
 DPL_USER
 )
 
-111 
+115 
 	`ex™
 ();
 
-112 
+116 
 	}
 }
 
@@ -28576,63 +28636,67 @@ fd
 	`myfunùiÚ
 (*);
 
-29 
+27 
+	`g‘gpid
+(*);
+
+30 
 	`¡©
 (cÚ¡ *, 
 ¡©
 *);
 
-30 * 
+31 * 
 	`¡rýy
 (*, const *);
 
-31 *
+32 *
 	`memmove
 (*, const *, );
 
-32 * 
+33 * 
 	`¡rchr
 (cÚ¡ *, 
 c
 );
 
-33 
+34 
 	`¡rcmp
 (const *, const *);
 
-34 
+35 
 	`´štf
 (, const *, ...);
 
-35 * 
+36 * 
 	`g‘s
 (*, 
 max
 );
 
-36 
+37 
 ušt
  
 	`¡¾’
 (const *);
 
-37 * 
+38 * 
 	`mem£t
 (*, , 
 ušt
 );
 
-38 * 
+39 * 
 	`m®loc
 (
 ušt
 );
 
-39 
+40 
 	`ä“
 (*);
 
-40 
+41 
 	`©oi
 (const *);
 
@@ -34813,9 +34877,15 @@ u±ime
 )
 
 33 
-	`SYSCALL
+	$SYSCALL
 (
 myfunùiÚ
+)
+
+34 
+	`SYSCALL
+(
+g‘gpid
 )
 
 	@vectors.S
