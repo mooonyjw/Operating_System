@@ -148,7 +148,7 @@ found:
   p->pid = nextpid++;
 
   p->level_of_queue = 0; // initialize the queue level to 0
-  p->time_quantum = 0; // initialize the time quantum to 0
+  p->time_quantum = 0; // initialize the time quantum to 2
 
   enqueue(&mlfq[0], p);
 
