@@ -90,8 +90,6 @@ trap(struct trapframe *tf)
   default:
     if(myproc() == 0 || (tf->cs&3) == 0){
       // In kernel, it must be our mistake.
-      if(myproc() == 0) cprintf("it is zero error!\n");
-      if((tf->cs&3) == 0) cprintf("it is no zero error!\n");
       cprintf("unexpected trap %d from cpu %d eip %x (cr2=0x%x)\n",
               tf->trapno, cpuid(), tf->eip, rcr2());
       panic("trap");

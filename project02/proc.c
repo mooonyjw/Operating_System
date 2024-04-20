@@ -20,7 +20,7 @@ struct queue{
   struct proc *tail;
   struct spinlock lock;
   int time_quantum;		// time quantum
-  int level;
+  int level;			// level of queue
 };
 
 struct monopolyqueue{
@@ -28,7 +28,6 @@ struct monopolyqueue{
   struct proc *tail;
   struct spinlock lock;
   int size;
-  int capacity;
 };
 
 struct queue mlfq[4];
@@ -48,9 +47,12 @@ void monodequeue(struct proc *target);
 
 uint global_ticks=0;
 
+
+//init_queue
 void 
 init_queue()
 {
+
   for(int i=0; i<4; i++){
     //mlfq[i].head = mlfq[i].tail = 0;
     //mlfq[i].time_quantum = 2*i+2;
@@ -61,6 +63,7 @@ init_queue()
 }
 
 
+//init_monoqueue
 void
 init_monoqueue()
 {
@@ -146,7 +149,6 @@ found:
 
   p->level_of_queue = 0; // initialize the queue level to 0
   p->time_quantum = 0; // initialize the time quantum to 0
-
 
   enqueue(&mlfq[0], p);
 
@@ -584,6 +586,7 @@ procdump(void)
   }
 }
 
+/*
 //priority_boosting
 void
 priority_boosting()
@@ -592,49 +595,41 @@ priority_boosting()
   acquire(&ptable.lock);
 
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    
     if(p->state == UNUSED) continue;
+    
     if(p->state == RUNNABLE || p->state == SLEEPING){
       p->level_of_queue =0;
-      p->ticks = 0;
-      
+      p->ticks = 0;  
     }
   }
   release(&ptable.lock);
-}
+}*/
+
 
 //enqueue
 void
 enqueue(struct queue *q, struct proc *p)
 {
   struct proc *last = q->head;
+  
   if(last){
+  
     while(last->next) last = last->next; 	// find last node
     last->next = p; 	//enqueue new proecess
   }
+  
   else{
     q->head = p;
   }
   p->next = NULL;
 }
 
-//monoenqueue
-void
-monoenqueue(struct proc *p)
-{
-  p->monopolized =1;
-  struct proc *last = moq.head;
-  if(last){
-    while(last->next) last = last->next; 	// find last node
-    last->next = p; 	//enqueue new proecess
-  }
-  else{
-    moq.head = p;
-    moq.tail =p;
-  }
-  p->next = NULL;
-}
 
-void dequeue(struct queue *q, struct proc *p){
+//dequeue
+void
+dequeue(struct queue *q, struct proc *p)
+{
     if (q->head == NULL) return; // empty queue
 
     acquire(&q->lock);
@@ -668,7 +663,29 @@ void dequeue(struct queue *q, struct proc *p){
     release(&q->lock); 
 }
 
-// monoqueue
+
+//monoenqueue
+void
+monoenqueue(struct proc *p)
+{
+  p->monopolized =1;
+  struct proc *last = moq.head;
+  
+  if(last){
+    
+    while(last->next) last = last->next; 	// find last node
+    last->next = p; 	//enqueue new proecess
+  }
+  
+  else{
+    moq.head = p;
+    moq.tail =p;
+  }
+  p->next = NULL;
+}
+
+
+// monodequeue
 void 
 monodequeue(struct proc *target) 
 {
@@ -677,30 +694,34 @@ monodequeue(struct proc *target)
     acquire(&moq.lock);
 
     if (target == moq.head) {
-        moq.head = target->next;
-        
-        if (moq.head == NULL) {
-            moq.tail = NULL;
-        }
+      moq.head = target->next;
+      
+      if (moq.head == NULL) {
+        moq.tail = NULL;
+      }
     } 
+    
     else {
-        struct proc *prev = moq.head;
+      struct proc *prev = moq.head;
         
-        while (prev->next != target) {
-        
-            if (prev->next == NULL) {
-                cprintf("Error! This process is not in moq.\n");
-                release(&moq.lock);
-                return;
-            }
-            prev = prev->next;
-        }
-        prev->next = target->next;
+      while (prev->next != target) {
         
         if (prev->next == NULL) {
-            moq.tail = prev;
+          cprintf("Error! This process is not in moq.\n");
+          release(&moq.lock);
+          return;
         }
+        
+        prev = prev->next;
+      }
+      
+      prev->next = target->next;
+        
+      if (prev->next == NULL) {
+        moq.tail = prev;
+      }
     }
+    
     target->monopolized = 0;
     target->next = NULL;
     release(&moq.lock);
@@ -735,6 +756,7 @@ setpriority(int pid, int priority)
   
   //struct proc *process;
   int found =0;
+  
   for(p = ptable.proc; p<&ptable.proc[NPROC]; p++){
   
     if(p->pid == pid){
@@ -753,7 +775,6 @@ setpriority(int pid, int priority)
 }
 
  
-
 // setmonopoly
 int
 setmonopoly(int pid, int password)
@@ -773,11 +794,13 @@ setmonopoly(int pid, int password)
       break;
     }
   }
+  
   if(found == 0) {
     cprintf("Error! Invalid process.\n");
     release(&ptable.lock);
     return -1;
   }
+  
   else if(found ==1){
   
     dequeue(&mlfq[p->level_of_queue], p);
@@ -789,9 +812,10 @@ setmonopoly(int pid, int password)
     p->monopolized = 1;
     p->level_of_queue = 99;
     release(&ptable.lock);
-    }
+  }
   return moq.size;
 }
+
 
 //monopolize
 void
@@ -801,7 +825,7 @@ monopolize()
 }
   
   
-
+//unmonopolize
 void
 unmonopolize()
 {
@@ -812,8 +836,7 @@ unmonopolize()
   
     if(p->state == ZOMBIE && p->monopolized ==1) {
       monodequeue(p);
-    }
-      
+    }    
   }
   //cprintf("no!\n");
   release(&moq.lock);
@@ -832,157 +855,144 @@ void scheduler(void)
   //init_monoqueue();
   for(;;) {
     
-    if (Mono == 1) {
-	    
+    if (Mono == 1) {    
 
-	    struct proc *inmoq = NULL;
-	    
-	    
-	    for (inmoq = moq.head; inmoq != NULL; inmoq =inmoq->next) {
-	        //cprintf("id: %d\n", inmoq->pid);
-	        if(inmoq->state == RUNNABLE) break;
-	    }
-	    
-	    acquire(&ptable.lock);
-	    c->proc = inmoq;
-	    switchuvm(inmoq);
-	    inmoq->state = RUNNING;
-	    
-	    swtch(&(c->scheduler), inmoq->context);
-	    switchkvm();
-	    release(&ptable.lock);
-	    
-	    // Process is done running for now.
-	    c->proc = 0;
-			
-	        
-	    if(inmoq->state == ZOMBIE){
-               monodequeue(inmoq);
-               inmoq->monopolized =0;
-            }
-	    if(moq.head==NULL){
-		unmonopolize();
-		//release(&ptable.lock);
+      struct proc *inmoq = NULL;
+    
+      for (inmoq = moq.head; inmoq != NULL; inmoq =inmoq->next) {
+          //cprintf("id: %d\n", inmoq->pid);
+      
+        if(inmoq->state == RUNNABLE) break;
+      }
+    
+      acquire(&ptable.lock);
+      c->proc = inmoq;
+      switchuvm(inmoq);
+      inmoq->state = RUNNING;
+    
+      swtch(&(c->scheduler), inmoq->context);
+      switchkvm();
+      release(&ptable.lock);
+    
+      // Process is done running for now.
+      c->proc = 0;
 		
-	    }
+        
+      if(inmoq->state == ZOMBIE){
+        monodequeue(inmoq);
+        inmoq->monopolized =0;
+      }
+      
+      if(moq.head==NULL){
+        unmonopolize();
+        //release(&ptable.lock);
+      }
 
-		
     }
+    
+    else if (Mono == 0){
+      // Enable interrupts on this processor.
+      sti();
+    
+      if(++global_ticks >= 100){
+        
+        for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+          
+          if(p->monopolized == 1) continue;
+          
+          if(p->state != UNUSED && p->state != ZOMBIE){
+            dequeue(&mlfq[p->level_of_queue], p);
+            p->level_of_queue = 0;
+            p->time_quantum = mlfq[0].time_quantum;
+            enqueue(&mlfq[0], p);
+          }
+        }
+        global_ticks = 0;
+      }
+
+      struct proc *selected_proc = NULL;
+      int selected_queue = -1;
+      acquire(&ptable.lock);
+      // Iterate over queues from highest to lowest priority
+      for(int i = 0; i < 4; i++){
+     
+        if(i<3){
+          
+          for(p = mlfq[i].head; p != NULL; p = p->next){
+            
+            if(p->state == RUNNABLE){
+              selected_proc = p;
+              selected_queue = i;
+              break;  // Found a runnable process in the queue
+            }
+          }
+          
+          if(selected_proc != NULL){
+            break;  // Found a runnable process, no need to check lower priority queues
+          }
+	}
 	
-    
-    else if (Mono==0){
-    
-	    // Enable interrupts on this processor.
-   	    sti();
-   	    
-	    if(++global_ticks >= 100){
-	      for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-	        if(p->monopolized == 1) continue;
-		if(p->state != UNUSED && p->state != ZOMBIE){
-		 
-		  dequeue(&mlfq[p->level_of_queue], p);
-		  
-		  p->level_of_queue = 0;
-		  p->time_quantum = mlfq[0].time_quantum;
-		 
-		  enqueue(&mlfq[0], p);
-		}
-	       
-	      }
-	      global_ticks = 0;
-	    }
-    
-	    struct proc *selected_proc = NULL;
-	    int selected_queue = -1;
-	    acquire(&ptable.lock);
-	    // Iterate over queues from highest to lowest priority
-	    for(int i = 0; i < 4; i++){
+	else if(i==3){
+	  
+	  // Check L3 for priority scheduling
+	  if (!selected_proc) { // No process is selected from L0, L1, L2
 	    
-	      if(i<3){
-	      
-		      for(p = mlfq[i].head; p != NULL; p = p->next){
-		      
-			if(p->state == RUNNABLE){
-			  selected_proc = p;
-			  selected_queue = i;
-			  break;  // Found a runnable process in the queue
-			}
-		      }
-		      
-		      if(selected_proc != NULL){
-		      
-			break;  // Found a runnable process, no need to check lower priority queues
-		      }
-		}
+	    struct proc *highest = NULL;
+	    int highpri = -1;
 	    
-	      else if(i==3){
-	      
-	        // Check L3 for priority scheduling
-		if (!selected_proc) { // No process is selected from L0, L1, L2
-		
-		    struct proc *highest = NULL;
-		    int highpri = -1;
-		    for (p = mlfq[3].head; p != NULL; p = p->next) {
-		    
-		        if (p->state == RUNNABLE && p->priority > highpri) {
-		        
-		            highest = p;
-		            highpri= p->priority;
-		            //cprintf("Run!%d\n ", highpri);
-		        }
-		    }
-		    selected_proc = highest;
-		    selected_queue = 3;
-		}
+	    for (p = mlfq[3].head; p != NULL; p = p->next) {
+	    
+	      if (p->state == RUNNABLE && p->priority > highpri) {
+	        highest = p;
+	        highpri= p->priority;
+	        //cprintf("Run!%d\n ", highpri);
 	      }
 	    }
-
-	    // If a runnable process is selected, switch to it
-	    if(selected_proc != NULL){
-	    
-	      if(selected_proc->state == RUNNABLE){
-	      
-		p = selected_proc;
-		c->proc = p;
-		switchuvm(p);
-		p->state = RUNNING;
-
-		swtch(&(c->scheduler), p->context);
-		switchkvm();
-	       
-		// Process is done running for now.
-		c->proc = 0;
-	       
-		p->time_quantum--;
-
-		if(p->time_quantum <= 0){
-		
-		  if(p->level_of_queue < 3){
-		  
-		    dequeue(&mlfq[selected_queue], p);
-		    int next_queue = 3;
-		    if(p->level_of_queue == 0){
-		    
-		      next_queue = (p->pid % 2 == 0) ? 2 : 1;
-		    }
-		    p->level_of_queue = next_queue;
-		    p->time_quantum = mlfq[next_queue].time_quantum;
-		    enqueue(&mlfq[next_queue], p);
-		  }
-		  else{
-		  
-		    p->priority = p->priority > 0 ? p->priority - 1 : 0;
-		    p->time_quantum = mlfq[3].time_quantum;
-		  }
-		}
-       
-	      }
-	    }
-    	release(&ptable.lock);
-    	
-  
+	    selected_proc = highest;
+	    selected_queue = 3;
+	  }
+        }
+      }
+      
+      // If a runnable process is selected, switch to it
+      if(selected_proc != NULL){
+    
+        if(selected_proc->state == RUNNABLE){
+          p = selected_proc;
+          c->proc = p;
+          switchuvm(p);
+          p->state = RUNNING;
+          
+          swtch(&(c->scheduler), p->context);
+          switchkvm();
+          
+          // Process is done running for now.
+          c->proc = 0;
+          p->time_quantum--;
+          
+          if(p->time_quantum <= 0){
+          
+            if(p->level_of_queue < 3){
+              dequeue(&mlfq[selected_queue], p);
+              
+              int next_queue = 3;
+                
+              if(p->level_of_queue == 0){
+                next_queue = (p->pid % 2 == 0) ? 2 : 1;
+              }
+              p->level_of_queue = next_queue;
+              p->time_quantum = mlfq[next_queue].time_quantum;
+              enqueue(&mlfq[next_queue], p);
+            }
+            
+            else{
+              p->priority = p->priority > 0 ? p->priority - 1 : 0;
+              p->time_quantum = mlfq[3].time_quantum;
+            }
+          }
+        }
+      }
+      release(&ptable.lock);
+    }
   }
 }
-}
-
-

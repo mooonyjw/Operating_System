@@ -51,11 +51,10 @@ struct proc {
   char name[16];               // Process name (debugging)
   
   int level_of_queue;		// queue level that include process
-  int ticks; 			// used ticks in process
   int priority;		// priority of process 0~10, default 0
-  int time_quantum;
+  int time_quantum;		// left time_quantum
   struct proc *next;		// point to next process
-  int monopolized;
+  int monopolized;		// is monopolized
 };
 
 
