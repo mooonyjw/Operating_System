@@ -9,16 +9,16 @@ int shared_resource = 0;
 void lock();
 void unlock();
 
-volatile int lock_flag = 0;
+volatile int flag = 0;
 
 void lock()
 {
-  int expected = 1;
-  while(expected != 0 ){
+  int num = 1;
+  while(num != 0 ){
     __asm__ __volatile__(
       "xchg %0, %1"
-      : "=r" (expected), "+m" (lock_flag)
-      : "0" (expected)
+      : "=r" (num), "+m" (flag)
+      : "0" (num)
       : "memory"
     );
   }
@@ -29,7 +29,7 @@ void unlock()
   __asm__ __volatile__(
     "" ::: "memory"
   );
-  lock_flag = 0;
+  flag = 0;
 }
 
 void* thread_func(void* arg) {
