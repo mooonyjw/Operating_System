@@ -90,12 +90,13 @@ kfree(char *v)
     r->next = kmem.freelist;
     kmem.freelist = r;
   }*/
-  r = (struct run*)v;
   if(ref_count[pa >> PGSHIFT] > 0)
     ref_count[pa >> PGSHIFT]--;
   
   if(ref_count[pa >> PGSHIFT] == 0){
     memset(v, 1, PGSIZE);
+    r = (struct run*)v;
+  
     r->next = kmem.freelist;
     freepage_count++;
     kmem.freelist = r;
@@ -171,9 +172,22 @@ get_refc(uint pa){
 int
 countfp(void)
 {
+  /*
   int count;
   acquire(&kmem.lock);
   count = freepage_count;
+  release(&kmem.lock);
+  return count;
+*/
+
+  int count = 0;
+  struct run *r;
+  
+  acquire(&kmem.lock);
+  for(r = kmem.freelist; r; r = r->next){
+    count++;
+  }
+  
   release(&kmem.lock);
   return count;
 }

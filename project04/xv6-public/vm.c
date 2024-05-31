@@ -462,46 +462,38 @@ countpp(void)
 {
   struct proc *curproc = myproc();
   pde_t *pgdir = curproc->pgdir;
-  int count = 0;
-
-  for (int i = 0; i < NPDENTRIES; i++) {
-    if (pgdir[i] & PTE_P) {
-      pte_t *pgtab = (pte_t *)P2V(PTE_ADDR(pgdir[i]));
-
-      for (int j = 0; j < NPTENTRIES; j++) {
-        if (pgtab[j] & PTE_P) {
+  pte_t *pte;
+  uint i, j;
+  int count =0;
+  
+  for(i =0; i<NPDENTRIES; i++){
+    if(pgdir[i] & PTE_P){
+      pte = (pte_t*)P2V(PTE_ADDR(pgdir[i]));
+      for(j = 0; j<NPTENTRIES; j++){
+        if(pte[j] & PTE_P){
+          
           count++;
         }
       }
     }
   }
-
   return count;
-
-  //return countvp();
 }
 
-int
-countptp(void)
+int countptp(void)
 {
-
   struct proc *p = myproc();
   pde_t *pgdir = p->pgdir;
-  int count = 0;
-  pde_t *pde;
+  int count = 1;
   
   for(int i = 0; i < NPDENTRIES; i++){
-    pde = &pgdir[i];
-    if(*pde & PTE_P){
+    pde_t pde = pgdir[i];
+    if(pde & PTE_P){
+      // Count the page table itself
       count++;
-      pte_t *pt = (pte_t*)P2V(PTE_ADDR(*pde));
-      for(int j = 0; j < NPTENTRIES; j++){
-        if(pt[j] & PTE_P){
-          count++;
-        }
-      }
     }
   }
+
   return count;
 }
 
