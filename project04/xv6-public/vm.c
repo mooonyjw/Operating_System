@@ -426,14 +426,13 @@ CoW_handler(void){
     memmove(mem, (char*)P2V(pa), PGSIZE);
     *pte = V2P(mem) | PTE_P | PTE_U | PTE_W;
     decr_refc(pa);
-    /*if(get_refc(pa) == 0){
+    if(get_refc(pa) == 0){
       kfree((char*)P2V(pa));
-    }*/
+    }
     
   }
   
   else{
-    //incr_refc(pa);
     *pte |= PTE_W;
   }
   
@@ -460,18 +459,16 @@ countvp(void)
 int
 countpp(void)
 {
-  struct proc *curproc = myproc();
-  pde_t *pgdir = curproc->pgdir;
+  struct proc *p = myproc();
+  pde_t *pgdir = p->pgdir;
   pte_t *pte;
-  uint i, j;
   int count =0;
   
-  for(i =0; i<NPDENTRIES; i++){
+  for(int i =0; i<NPDENTRIES; i++){
     if(pgdir[i] & PTE_P){
       pte = (pte_t*)P2V(PTE_ADDR(pgdir[i]));
-      for(j = 0; j<NPTENTRIES; j++){
+      for(int j = 0; j<NPTENTRIES; j++){
         if(pte[j] & PTE_P){
-          
           count++;
         }
       }
@@ -489,7 +486,6 @@ int countptp(void)
   for(int i = 0; i < NPDENTRIES; i++){
     pde_t pde = pgdir[i];
     if(pde & PTE_P){
-      // Count the page table itself
       count++;
     }
   }
